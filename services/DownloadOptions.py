@@ -90,8 +90,8 @@ def download_audio(url):
     # subprocess.run(cmd, capture_output=True, text = True)
 
 
-def download_video(url,quality):
-    cmd = ['yt-dlp', url,"-f", f"bv*[height={quality}]+ba","--merge-output-format", "mp4"]
+def download_video(url):
+    cmd = ['yt-dlp', url,"-f", f"bv*[height=720]+ba","--merge-output-format", "mp4", "-P", "downloads\\", "-P", "temp:temp\\","--windows-filenames","-N", "4"]
     process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, universal_newlines=True, bufsize=1)
     return process
     # subprocess.run(cmd, text = True, check=True)
@@ -111,7 +111,7 @@ if __name__ == "__main__":
 
     youtubeLink = input("Enter the youtube link: ")
     print("download in progress...")
-    t1 = threading.Thread(target=download_video, args=(youtubeLink,))
+    t1 = threading.Thread(target=download_video, args=(URL,))
     t1.start()
     t1.join()
     print("download completed!")
