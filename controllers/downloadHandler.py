@@ -2,10 +2,11 @@ import sys
 import os
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.dirname(SCRIPT_DIR))
-import services.DownloadOptions as d
+import services.DownloadOptions as dOpts
 import base64
 
-IMAGE_PATH = 'thumbnail_filepath\\'
+
+IMAGE_PATH = f'thumbnail_filepath\\{os.listdir("thumbnail\\")[0]}'
 
 
 def convert_image_to_base64():
@@ -20,8 +21,11 @@ def convert_image_to_base64():
 
 
 def get_video_information(url):
-    qualities_available = list(d.get_available_quality(url))
-    d.getThumbnail(url)
+    qualities_available = list(dOpts.get_available_quality(url))
+    dOpts.getThumbnail(url)
+    image_bytecode = convert_image_to_base64()
+    video_title,uploader,view_count,like_count = dOpts.get_video_info(url)
+    return video_title,uploader,view_count,like_count,image_bytecode,qualities_available
     
 
 

@@ -1,16 +1,12 @@
 import subprocess
 import re
-# import yt_dlp
+import yt_dlp
 import threading
 import yt_dlp
-# import pprint
 
 
 
-playlist_url = "https://youtube.com/playlist?list=PLbpi6ZahtOH7c6nDA9YG3QcyRGbZ4xDFn&si=TClA3jkK99Ce2DRl"
-thumbnail_filepath = "thumbnail\\"
-url = "https://youtu.be/Js6H70-eADY?si=fF6a5sRPprlb1MDr"
-age_restricted_video = "https://youtu.be/voQBX6yn2XY?si=e_4DHuE3jUDv5whc"
+
 
 
 def get_video_info(url):
@@ -48,43 +44,57 @@ def get_available_quality(url):
     return set(matches)
 
 
-cmd = ['yt-dlp', url,"-f", "bv*[height=720]+ba"]
-cmdDownloadAudio = ['yt-dlp', url,"-f", "ba"]
+# cmd = ['yt-dlp', url,"-f", "bv*[height=720]+ba"]
+# cmdDownloadAudio = ['yt-dlp', url,"-f", "ba"]
 
 def download_live_stream(url):
     cmd = ['yt-dlp',"--live-from-start","--cookies", "youtube.com_cookies.txt", url]
-    subprocess.run(cmd, text = True)
+    process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, universal_newlines=True, bufsize=1)
+    return process
+    # subprocess.run(cmd, text = True)
 
 
-def getThumbnail(url):
+def getThumbnail(url, thumbnail_filepath):
     cmdThumbnail = ['yt-dlp', url, "--write-thumbnail", "--no-download","-P",thumbnail_filepath,"--windows-filenames"]
     subprocess.run(cmdThumbnail, capture_output=True, text = True)
     # print(output)
 
 def download_playlist_selection(playlist_url:str, selection:str):
     cmd = ['yt-dlp',"-I", selection , playlist_url, "--yes-playlist", "-P", "playlist\\", "-P", "temp:temp\\","-f","bv*[height=720]+ba", "--merge-output-format", "mkv", "--windows-filenames"]
-    subprocess.run(cmd, text = True)
+    process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, universal_newlines=True, bufsize=1)
+    return process
+    # subprocess.run(cmd, text = True)
 
 def download_playlist_audio_selection(playlist_url:str, selection:str):
     cmd = ['yt-dlp', "-I", selection, playlist_url, "--yes-playlist", "--extract-audio", "--audio-format", "mp3"]
-    subprocess.run(cmd, capture_output=True, text = True)
+    process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, universal_newlines=True, bufsize=1)
+    return process
+    # subprocess.run(cmd, capture_output=True, text = True)
 
 def download_playlist(playlist_url):
     cmd = ['yt-dlp', playlist_url, "--yes-playlist", "-P", "playlist\\", "-P", "temp:temp\\","-f","bv*[height=720]+ba", "--merge-output-format", "mkv", "--windows-filenames"]
-    subprocess.run(cmd, text = True)
+    process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, universal_newlines=True, bufsize=1)
+    return process
+    # subprocess.run(cmd, text = True)
 
-def download_playlist_audio(url):
+def download_playlist_audio(playlist_url):
     cmd = ['yt-dlp', playlist_url, "--yes-playlist", "--extract-audio", "--audio-format", "mp3"]
-    subprocess.run(cmd, capture_output=True, text = True)
+    process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, universal_newlines=True, bufsize=1)
+    return process
+    # subprocess.run(cmd, capture_output=True, text = True)
 
 def download_audio(url):
     cmd = ['yt-dlp', url, "--extract-audio", "--audio-format", "mp3"]
-    subprocess.run(cmd, capture_output=True, text = True)
+    process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, universal_newlines=True, bufsize=1)
+    return process
+    # subprocess.run(cmd, capture_output=True, text = True)
 
 
 def download_video(url,quality):
     cmd = ['yt-dlp', url,"-f", f"bv*[height={quality}]+ba","--merge-output-format", "mp4"]
-    subprocess.run(cmd, text = True, check=True)
+    process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, universal_newlines=True, bufsize=1)
+    return process
+    # subprocess.run(cmd, text = True, check=True)
 
 
 
@@ -94,14 +104,16 @@ def download_video(url,quality):
 
 
 if __name__ == "__main__":
+    PLAYLIST_URL = "https://youtube.com/playlist?list=PLbpi6ZahtOH7c6nDA9YG3QcyRGbZ4xDFn&si=TClA3jkK99Ce2DRl"
+    THUMBNAIL_FILEPATH = "thumbnail\\"
+    URL = "https://youtu.be/Js6H70-eADY?si=fF6a5sRPprlb1MDr"
+    AGE_RESTRICTED_VIDEO = "https://youtu.be/voQBX6yn2XY?si=e_4DHuE3jUDv5whc"
+
     youtubeLink = input("Enter the youtube link: ")
     print("download in progress...")
     t1 = threading.Thread(target=download_video, args=(youtubeLink,))
     t1.start()
     t1.join()
-    # download_video(youtubeLink)
-    # download_video(url)
-    # download_playlist(playlist_url)
     print("download completed!")
 
     
