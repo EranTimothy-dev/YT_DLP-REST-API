@@ -142,9 +142,9 @@ if __name__ == "__main__":
 
     youtubeLink = input("Enter the youtube link: ")
     print("download in progress...")
-    t1 = threading.Thread(target=download_video, args=(URL,))
-    t1.start()
-    t1.join()
+    # t1 = threading.Thread(target=download_video, args=(URL,))
+    # t1.start()
+    # t1.join()
     print("download completed!")
 
     
