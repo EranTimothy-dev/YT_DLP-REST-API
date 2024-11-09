@@ -3,7 +3,7 @@ import sys
 import os
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.dirname(SCRIPT_DIR))
-from services.YtdlpOptions import getThumbnail, download_video, get_video_info, extract_video_info
+from services.ExtractionOptions import getThumbnail, get_video_info, extract_video_info, extract_playlist_info
 
 # SCRIPT_DIR = os.path.dirname(os.path.abspath('..'))
 # sys.path.append(os.path.dirname(SCRIPT_DIR))
@@ -42,9 +42,11 @@ class ThreadWithReturnValue(threading.Thread):
         return self._return
 
 
-t1 = ThreadWithReturnValue(target=extract_video_info, args=(url2,))
-t1.start()
-process = t1.join()
+t1 = ThreadWithReturnValue(target=extract_video_info, args=(playlist_url,))
+t2 = ThreadWithReturnValue(target=extract_playlist_info, args=(playlist_url,))
+# t1.start()
+t2.start()
+process = t2.join()
 for line in process.stdout:
     print(line.strip())
 
