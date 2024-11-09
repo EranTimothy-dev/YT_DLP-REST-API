@@ -2,7 +2,8 @@ import sys
 import os
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.dirname(SCRIPT_DIR))
-import services.DownloadOptions as dOpts
+import services.YtdlpOptions as ytOpts
+from DownloadsPath import get_non_windows_download_folder, get_windows_download_folder
 import base64
 
 
@@ -21,12 +22,13 @@ def convert_image_to_base64():
 
 
 def get_video_information(url):
-    qualities_available = list(dOpts.get_available_quality(url))
-    dOpts.getThumbnail(url)
+    qualities_available = list(ytOpts.get_available_quality(url))
+    ytOpts.getThumbnail(url)
     image_bytecode = convert_image_to_base64()
-    video_title,uploader,view_count,like_count = dOpts.get_video_info(url)
+    video_title,uploader,view_count,like_count = ytOpts.get_video_info(url)
     return video_title,uploader,view_count,like_count,image_bytecode,qualities_available
     
+
 
 
 

@@ -3,7 +3,7 @@ import sys
 import os
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.dirname(SCRIPT_DIR))
-from services.DownloadOptions import getThumbnail, download_video
+from services.YtdlpOptions import getThumbnail, download_video, get_video_info, extract_video_info
 
 # SCRIPT_DIR = os.path.dirname(os.path.abspath('..'))
 # sys.path.append(os.path.dirname(SCRIPT_DIR))
@@ -12,9 +12,10 @@ from services.DownloadOptions import getThumbnail, download_video
 import threading
 
 playlist_url = "https://youtube.com/playlist?list=PLbpi6ZahtOH7c6nDA9YG3QcyRGbZ4xDFn&si=TClA3jkK99Ce2DRl"
-thumbnail_filepath = "thumbnail\\"
 url = "https://youtu.be/Js6H70-eADY?si=fF6a5sRPprlb1MDr"
+thumbnail_filepath = "thumbnail\\"
 url1 = "https://youtu.be/whEObh8waxg?si=kBbfH05WMNQpNTvJ"
+url2 = "https://youtu.be/_kkvcijCQ38?si=iE1zlTnG6cl0Mjpz"
 age_restricted_video = "https://youtu.be/voQBX6yn2XY?si=e_4DHuE3jUDv5whc"
 
 
@@ -41,11 +42,15 @@ class ThreadWithReturnValue(threading.Thread):
         return self._return
 
 
-t1 = ThreadWithReturnValue(target=download_video, args=(url1,))
+t1 = ThreadWithReturnValue(target=extract_video_info, args=(url2,))
 t1.start()
 process = t1.join()
 for line in process.stdout:
     print(line.strip())
 
 
-
+# check video information extractor for playlists
+# video_extractor_thread = ThreadWithReturnValue(target=get_video_info, args=(playlist_url,))
+# video_extractor_thread.start()
+# video_info, video_uploader, video_views, video_likes = video_extractor_thread.join()
+# video_info, video_uploader, video_views, video_likes = get_video_info(playlist_url)
