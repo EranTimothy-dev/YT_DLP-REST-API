@@ -1,50 +1,11 @@
 import subprocess
 import re
-# import threading
 import yt_dlp
 import os
 import sys
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.dirname(SCRIPT_DIR))
-from controllers.DownloadsPath import get_non_windows_download_folder,get_windows_download_folder
 
-
-def get_downloads_folder():
-    if os.name == "nt":
-        downloads_folder = get_windows_download_folder()
-    else:
-        downloads_folder = get_non_windows_download_folder()
-
-
-def get_video_info(url):
-    # get the video information
-    # Set up yt-dlp options
-    ydl_opts = {
-        'quiet': True,  # Suppress output
-        # 'noplaylist': True,  # Do not download playlists
-        'yesplaylist': True,  
-    }
-
-    # Create a YoutubeDL instance with the options
-    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-        # Extract info from the URL
-        info_dict = ydl.extract_info(url, download=False)  # Set download to False to only get metadata
-
-        # Extract desired information
-        video_title = info_dict.get('title', 'Unknown Title')
-        uploader = info_dict.get('uploader', 'Unknown Uploader')
-        view_count = info_dict.get('view_count', 'Unknown Views')
-        like_count = info_dict.get('like_count', 'Unknown Likes')
-
-        # Print the extracted information
-        # print(f'Title: {video_title}')
-        # print(f'Uploader: {uploader}')
-        # print(f'Views: {view_count}')
-        # print(f'Likes: {like_count}')
-
-        return video_title,uploader,view_count,like_count
-
-        
 
 
 def extract_video_info(url):
