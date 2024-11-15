@@ -9,13 +9,11 @@ sys.path.append(os.path.dirname(SCRIPT_DIR))
 from controllers.DownloadsPath import get_non_windows_download_folder,get_windows_download_folder
 
 
-# cmd = ['yt-dlp', url,"-f", "bv*[height=720]+ba"]
-# cmdDownloadAudio = ['yt-dlp', url,"-f", "ba"]
-
-if os.name == "nt":
-    downloads_folder = get_windows_download_folder()
-else:
-    downloads_folder = get_non_windows_download_folder()
+def get_downloads_folder():
+    if os.name == "nt":
+        downloads_folder = get_windows_download_folder()
+    else:
+        downloads_folder = get_non_windows_download_folder()
 
 
 def get_video_info(url):
@@ -56,10 +54,15 @@ def extract_video_info(url):
     return process
     
 def extract_playlist_info(url):
-    cmd = ['yt-dlp', url, "--no-download", "--parse-metadata", "playlist_count:%(playlist_count)s", "--parse-metadata", "playlist_uploader:%(playlist_uploader)s","--parse-metadata", "playlist_title:%(playlist_title)s", "--parse-metadata", "title:%(title)s", "--parse-metadata", "uploader:%(uploader)s", "--parse-metadata", "view_count:%(view_count)s", "--parse-metadata", "like_count:%(like_count)s","--parse-metadata", "upload_date:%(upload_date)s", "--parse-metadata", "description:%(description)s","--parse-metadata", "duration:%(duration)s", "--windows-filenames"]
-    process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, universal_newlines=True, bufsize=1)
-    # process = subprocess.run(cmd, capture_output=True, text = True)
-    return process
+    playlist_info_cmd = ['yt-dlp', url, "--no-download","-I","1", "--parse-metadata", "playlist_count:%(playlist_count)s", "--parse-metadata", "playlist_uploader:%(playlist_uploader)s","--parse-metadata", "playlist_title:%(playlist_title)s","--parse-metadata", "playlist_description:%(description)s"]
+    playlist_info = subprocess.Popen(playlist_info_cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, universal_newlines=True, bufsize=1)
+    # playlist_info = subprocess.run(playlist_info_cmd, capture_output=True, text = True)
+    # yield playlist_info
+    cmd = ['yt-dlp', url, "--no-download", "--parse-metadata", "title:%(title)s", "--parse-metadata", "uploader:%(uploader)s", "--parse-metadata", "view_count:%(view_count)s", "--parse-metadata", "like_count:%(like_count)s","--parse-metadata", "upload_date:%(upload_date)s", "--parse-metadata", "description:%(description)s","--parse-metadata", "duration:%(duration)s", "--windows-filenames"]
+    video_info = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, universal_newlines=True, bufsize=1)
+    # video_info = subprocess.run(cmd, capture_output=True, text = True)
+    # return str(video_info),str(playlist_info)
+    return video_info,playlist_info
 
 
 def get_available_quality(url):

@@ -4,6 +4,7 @@ import os
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.dirname(SCRIPT_DIR))
 from services.ExtractionOptions import getThumbnail, get_video_info, extract_video_info, extract_playlist_info
+from services.VideoOptions import download_video, download_age_restricted_video
 
 # SCRIPT_DIR = os.path.dirname(os.path.abspath('..'))
 # sys.path.append(os.path.dirname(SCRIPT_DIR))
@@ -42,15 +43,28 @@ class ThreadWithReturnValue(threading.Thread):
         return self._return
 
 
-t1 = ThreadWithReturnValue(target=extract_video_info, args=(playlist_url,))
+# t1 = ThreadWithReturnValue(target=extract_video_info, args=(playlist_url,))
+# t1 = ThreadWithReturnValue(target=download_video, args=(url,))
+t1 = ThreadWithReturnValue(target=download_age_restricted_video, args=(age_restricted_video,))
 t2 = ThreadWithReturnValue(target=extract_playlist_info, args=(playlist_url,))
-# t1.start()
-t2.start()
-process = t2.join()
-for line in process.stdout:
+t1.start()
+# t2.start()
+# video_info, playlist_info = t2.join() 
+info = t1.join()
+# print(type(playlist_info))
+# print(playlist_info)
+print("\n\n")
+# print(video_info)
+
+for line in info.stdout:
     print(line.strip())
-
-
+print("\n\n")
+# for line in video_info.stdout:
+#     print(line.strip())
+    
+    
+# print("\n\n")
+# print(playlist_info)
 # check video information extractor for playlists
 # video_extractor_thread = ThreadWithReturnValue(target=get_video_info, args=(playlist_url,))
 # video_extractor_thread.start()
