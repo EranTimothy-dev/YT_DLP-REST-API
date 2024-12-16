@@ -2,6 +2,6 @@
 downloads/
 thumbnail/
 README.md
-test/
+test/test.py
 downloadLogs.py
-test.py
+testFiles/
