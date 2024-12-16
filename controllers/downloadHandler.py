@@ -2,7 +2,10 @@ import sys
 import os
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.dirname(SCRIPT_DIR))
-import services.ExtractionOptions as ytOpts
+import services.VideoOptions as VOps
+import services.ExtractionOptions as EOps
+import services.PlaylistOptions as PLOps
+import services.LiveStreamOptions as LSOps
 # from DownloadsPath import get_non_windows_download_folder, get_windows_download_folder
 import base64
 
@@ -21,12 +24,11 @@ def convert_image_to_base64():
 
 
 
-def get_video_information(url):
-    qualities_available = list(ytOpts.get_available_quality(url))
-    ytOpts.getThumbnail(url)
+
+def get_video_information(url,thumbnail_path = "thumbnail\\"):
+    qualities_available = list(EOps.get_available_quality(url))
+    EOps.getThumbnail(url, thumbnail_path)
     image_bytecode = convert_image_to_base64()
-    video_title,uploader,view_count,like_count = ytOpts.get_video_info(url)
-    return video_title,uploader,view_count,like_count,image_bytecode,qualities_available
     
 
 

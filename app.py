@@ -1,11 +1,13 @@
 from flask import Flask
 from flask_restful import Api, Resource, reqparse, abort, marshal_with, fields
-import asyncio
+# import asyncio
 
 
 app = Flask(__name__)
 api = Api(app)
 
+video_args = reqparse.RequestParser()
+video_args.add_argument("url", type=str, required=True, help="url cannot be empty")
 
 # format to be serialized for relevant fields
 video_fields = {
@@ -22,6 +24,12 @@ video_info = {
     'like_count': fields.Integer,
 }
 
+        
+# class ExtractVideo(Resource):
+#     @marshal_with(video_fields)
+#     def get(self, url):
+#         EOps.extract_video_info(url)
+        
         
 
 
