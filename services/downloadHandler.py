@@ -1,11 +1,11 @@
 import sys
 import os
-SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(os.path.dirname(SCRIPT_DIR))
-import services.VideoOptions as VOps
-import services.ExtractionOptions as EOps
-import services.PlaylistOptions as PLOps
-import services.LiveStreamOptions as LSOps
+# SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+# sys.path.append(os.path.dirname(SCRIPT_DIR))
+import VideoOptions as VOps
+import ExtractionOptions as EOps
+import PlaylistOptions as PLOps
+import LiveStreamOptions as LSOps
 # from DownloadsPath import get_non_windows_download_folder, get_windows_download_folder
 import base64
 
