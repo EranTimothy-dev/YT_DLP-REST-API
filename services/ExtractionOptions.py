@@ -29,15 +29,48 @@ def extract_playlist_info(url):
 def get_available_quality(url):
     cmd = ['yt-dlp', url, "--list-formats", "--no-download"]
     output = subprocess.run(cmd, capture_output=True, text = True)
-    pattern = r'\b(1080p|720p|480p|360p|240p|144p)\b'
-    matches = re.findall(pattern, output.stdout.strip())
-    return set(matches)
+    # pattern = r'\b(1080p|720p|480p|360p|240p|144p)\b'
+    # extension = r'\b(mp4|mkv|webm|m4a)\b'
+    quality = r"(\d+)x(\d+)"
+    matches = re.findall(quality, output.stdout.strip())
+    # extension_matches = re.findall(extension, output.stdout.strip())
+    return set(matches)#, set(extension_matches)
 
 
 def getThumbnail(url, thumbnail_filepath):
     cmdThumbnail = ['yt-dlp', url, "--write-thumbnail", "--no-download","-P",thumbnail_filepath,"--windows-filenames"]
     subprocess.run(cmdThumbnail, capture_output=True, text = True)
     # print(output)
+
+
+URLS = ['https://www.youtube.com/watch?v=BaW_jenozKc']
+
+def format_selector(ctx):
+    """ Select the best video and the best audio that won't result in an mkv.
+    NOTE: This is just an example and does not handle all cases """
+
+    # formats are already sorted worst to best
+    formats = ctx.get('formats')[::-1]
+
+    # acodec='none' means there is no audio
+    best_video = next(f for f in formats
+                      if f['vcodec'] != 'none' and f['acodec'] == 'none')
+
+    # find compatible audio extension
+    audio_ext = {'mp4': 'm4a', 'webm': 'webm'}[best_video['ext']]
+    # vcodec='none' means there is no video
+    best_audio = next(f for f in formats if (
+        f['acodec'] != 'none' and f['vcodec'] == 'none' and f['ext'] == audio_ext))
+
+    print("beat video: ", best_video , "\n\nbeat audio: " , best_audio)
+    # These are the minimum required fields for a merged format
+    yield {
+        'format_id': f'{best_video["format_id"]}+{best_audio["format_id"]}',
+        'ext': best_video['ext'],
+        'requested_formats': [best_video, best_audio],
+        # Must be + separated list of protocols
+        'protocol': f'{best_video["protocol"]}+{best_audio["protocol"]}'
+    }
 
 
 
@@ -104,12 +137,20 @@ if __name__ == "__main__":
     URL = "https://youtu.be/Js6H70-eADY?si=fF6a5sRPprlb1MDr"
     AGE_RESTRICTED_VIDEO = "https://youtu.be/voQBX6yn2XY?si=e_4DHuE3jUDv5whc"
 
-    youtubeLink = input("Enter the youtube link: ")
-    print("download in progress...")
+    ydl_opts = {
+        'format': format_selector,
+        'download': False,
+    }
+
+    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+        ydl.download(URL)
+
+    # youtubeLink = input("Enter the youtube link: ")
+    # print("download in progress...")
     # t1 = threading.Thread(target=download_video, args=(URL,))
     # t1.start()
     # t1.join()
-    print("download completed!")
+    # print("download completed!")
 
 
     
