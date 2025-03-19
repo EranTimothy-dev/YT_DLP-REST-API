@@ -1,5 +1,6 @@
 from flask import Flask
 from flask_restful import Api, Resource, reqparse, abort, marshal_with, fields
+import services.ExtractionOptions as EOps
 # import asyncio
 
 
@@ -25,10 +26,10 @@ video_info = {
 }
 
         
-# class ExtractVideo(Resource):
-#     @marshal_with(video_fields)
-#     def get(self, url):
-#         EOps.extract_video_info(url)
+class ExtractVideo(Resource):
+    @marshal_with(video_fields)
+    def get(self, url):
+        EOps.extract_video_info(url)
         
         
 
