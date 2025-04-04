@@ -1,9 +1,0 @@
-Metadata-Version: 2.4
-Name: youtube_downloader
-Version: 0.3.0
-Summary: An REST-API service for downloading youtube videos and audios
-Author: Eran Perera
-Author-email: eranperera.dev@gmail.com
-Dynamic: author
-Dynamic: author-email
-Dynamic: summary
