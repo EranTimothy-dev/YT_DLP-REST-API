@@ -3,7 +3,7 @@ import subprocess
 
 
 def download_audio(url):
-    cmd = ['yt-dlp', url, "--extract-audio", "--audio-format", "mp3"]
+    cmd = ['yt-dlp', url, "--extract-audio", "--audio-format", "mp3", "-P", "downloads\\", "-P", "temp:temp\\","--windows-filenames"]
     process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, universal_newlines=True, bufsize=1, encoding="utf-8")
     return process
     # subprocess.run(cmd, capture_output=True, text = True)
