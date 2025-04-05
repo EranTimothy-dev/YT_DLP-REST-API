@@ -10,17 +10,17 @@ import sys
 
 def extract_video_info(url):
     cmd = ['yt-dlp',url, "--no-download", "--parse-metadata", "title:%(title)s", "--parse-metadata", "uploader:%(uploader)s", "--parse-metadata", "view_count:%(view_count)s", "--parse-metadata", "like_count:%(like_count)s","--parse-metadata", "upload_date:%(upload_date)s", "--parse-metadata", "description:%(description)s","--parse-metadata", "duration:%(duration)s"]
-    process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, universal_newlines=True, bufsize=1)
+    process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, universal_newlines=True, bufsize=1, encoding="utf-8")
     # process = subprocess.run(cmd, capture_output=True, text = True)
     return process
     
 def extract_playlist_info(url):
     playlist_info_cmd = ['yt-dlp', url, "--no-download","-I","1", "--parse-metadata", "playlist_count:%(playlist_count)s", "--parse-metadata", "playlist_uploader:%(playlist_uploader)s","--parse-metadata", "playlist_title:%(playlist_title)s","--parse-metadata", "playlist_description:%(description)s"]
-    playlist_info = subprocess.Popen(playlist_info_cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, universal_newlines=True, bufsize=1)
+    playlist_info = subprocess.Popen(playlist_info_cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, universal_newlines=True, bufsize=1, encoding="utf-8")
     # playlist_info = subprocess.run(playlist_info_cmd, capture_output=True, text = True)
     # yield playlist_info
     cmd = ['yt-dlp', url, "--no-download", "--parse-metadata", "title:%(title)s", "--parse-metadata", "uploader:%(uploader)s", "--parse-metadata", "view_count:%(view_count)s", "--parse-metadata", "like_count:%(like_count)s","--parse-metadata", "upload_date:%(upload_date)s", "--parse-metadata", "description:%(description)s","--parse-metadata", "duration:%(duration)s", "--windows-filenames"]
-    video_info = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, universal_newlines=True, bufsize=1)
+    video_info = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, universal_newlines=True, bufsize=1, encoding="utf-8")
     # video_info = subprocess.run(cmd, capture_output=True, text = True)
     # return str(video_info),str(playlist_info)
     return video_info,playlist_info
@@ -39,7 +39,7 @@ def get_available_quality(url):
 
 def getThumbnail(url, thumbnail_filepath):
     cmdThumbnail = ['yt-dlp', url, "--write-thumbnail", "--no-download","-P",thumbnail_filepath,"--windows-filenames"]
-    subprocess.run(cmdThumbnail, capture_output=True, text = True)
+    subprocess.run(cmdThumbnail, capture_output=True, text = True, encoding="utf-8")
     # print(output)
 
 
