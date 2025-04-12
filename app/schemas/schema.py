@@ -1,18 +1,23 @@
-from typing import Optional
+from typing import Optional, Set
 from pydantic import BaseModel
 
 # create schemas 
 class VideoInfo(BaseModel):
-    id: Optional[int]
     title: str
     description: Optional[str] = None
     thumbnail: Optional[str] = None
     view_count: Optional[str] = None
     like_count: Optional[str] = None
     duration: Optional[str] = None 
-    available_resolutions: set
+    
 
 
 class VideoRequest(BaseModel):
-    id: Optional[int]
     url: str
+
+
+class VideoResponse(BaseModel):
+    video_info: VideoInfo
+    available_extensions: Set = {"mp4","webm","mkv"}
+    available_resolutions: Set
+    
