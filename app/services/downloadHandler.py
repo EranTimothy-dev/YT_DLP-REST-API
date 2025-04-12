@@ -25,10 +25,11 @@ def convert_image_to_base64():
 
 
 
-def get_video_information(url,thumbnail_path = "thumbnail\\"):
-    qualities_available = list(EOps.get_available_quality(url))
+def get_information(url,thumbnail_path = "thumbnail\\"):
+    qualities_available = list(EOps.get_available_quality(url)) 
     EOps.getThumbnail(url, thumbnail_path)
     image_bytecode = convert_image_to_base64()
+    
     
 
 
