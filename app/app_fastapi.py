@@ -1,6 +1,15 @@
 from fastapi import  FastAPI
+from fastapi.responses import ORJSONResponse
 
-app = FastAPI()
+app = FastAPI(
+    title="Youtube Downloader",
+    description="An REST-API service for downloading youtube videos and audios",
+    version="0.3.0",
+    default_response_class=ORJSONResponse
+    )
+
+
+
 
 
 
