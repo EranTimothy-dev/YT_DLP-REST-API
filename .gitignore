@@ -7,6 +7,6 @@ downloadLogs.py
 testFiles/
 app.py
 requirements1.txt
-test/*
-test/
+# test/*
+# test/
 youtube_downloader.egg-info/
