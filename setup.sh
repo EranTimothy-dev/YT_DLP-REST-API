@@ -11,8 +11,10 @@ if [ ! -d "$VENV_DIR"]; then
     echo "Creating virtual environment"
     if [ $OSTYPE == "msys" || $OSTYPE == "cygwin" ]; then
         python -m venv $VENV_DIR
+        echo "created windows virtual environment"
     else
         python3 -m venv $VENV_DIR
+        echo "created linux virtual environment"
     fi
 else
     echo "Virtual environment exists"
@@ -21,8 +23,10 @@ fi
 echo "Activating virtual environment"
 if [$OSTYPE == "msys" || $OSTYPE == "cygwin" ]; then
     source $VENV_DIR/Scripts/activate
+    echo "Activated windows virtual environment"
 else
     source $VENV_DIR/bin/activate
+    echo "Activated linux virtual environment"
 fi
 
 echo "Installing package in editable mode"
