@@ -29,7 +29,7 @@ def convert_image_to_base64():
 
 
 
-def get_information(url,thumbnail_path = "thumbnail\\"):
+async def get_information(url,thumbnail_path = "thumbnail\\"):
     
     video_info = {}
     qualities_available = EOps.get_available_quality(url)
