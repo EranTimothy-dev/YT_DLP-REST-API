@@ -7,6 +7,7 @@ from app.services.ExtractionOptions import getThumbnail, extract_video_info, ext
 from app.services.DownloadOptions import download_video, download_age_restricted_video, download_audio
 import threading
 import time
+from app.services.downloadHandler import get_information
 
 playlist_url = "https://youtube.com/playlist?list=PLbpi6ZahtOH7c6nDA9YG3QcyRGbZ4xDFn&si=TClA3jkK99Ce2DRl"
 url = "https://youtu.be/Js6H70-eADY?si=fF6a5sRPprlb1MDr"
@@ -32,6 +33,10 @@ class ThreadWithReturnValue(threading.Thread):
 
 
 input_url = input("Enter youtube video url: ")
+vid_info = get_information(input_url)
+print(vid_info.video_info.title)
+print(vid_info.available_resolutions)
+
 input_url2 = input("Enter youtube video url: ")
 availbale_quality = get_available_quality(input_url)
 available_extensions = {"mp4","webm","mkv"}
