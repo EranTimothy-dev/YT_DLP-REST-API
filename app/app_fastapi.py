@@ -12,12 +12,17 @@ app = FastAPI(
     default_response_class=ORJSONResponse
     )
 
-app.post("/extract_video_info")
+    
+@app.post("/extract_video_info")
 async def extract_info(request: VideoRequest):
     url = request.url
-    return await get_information(url)
+    video_response = await get_information(url)
+    return video_response
     
 
+@app.post("/test")
+async def test_endpoint(request: dict):
+    return {"ok": True}
 
 
 
