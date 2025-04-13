@@ -9,7 +9,7 @@ import app.services.ExtractionOptions as EOps
 import app.services.PlaylistOptions as PLOps
 import app.services.LiveStreamOptions as LSOps
 
-from ThreadRV import ThreadWithReturnValue as TWRV
+from app.services.ThreadRV import ThreadWithReturnValue as TWRV
 
 IMAGE_PATH = f'thumbnail_filepath\\{os.listdir("thumbnail\\")[0]}'
 
