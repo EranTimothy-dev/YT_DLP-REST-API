@@ -1,5 +1,5 @@
-from typing import Optional, Set
-from pydantic import BaseModel, field_serializer
+from typing import Optional, Set, Tuple
+from pydantic import BaseModel, field_serializer, Field
 import datetime
 
 # create schemas 
@@ -29,6 +29,6 @@ class VideoRequest(BaseModel):
 
 class VideoResponse(BaseModel):
     video_info: VideoInfo
-    available_extensions: Set = {"mp4","webm","mkv"}
-    available_resolutions: Set
+    available_extensions: Set[str] = Field(default_factory=lambda: {"mp4","webm","mkv"})
+    available_resolutions: Set[Tuple[str,str]]
     
