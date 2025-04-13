@@ -1,5 +1,6 @@
 from typing import Optional, Set
-from pydantic import BaseModel
+from pydantic import BaseModel, field_serializer
+import datetime
 
 # create schemas 
 class VideoInfo(BaseModel):
@@ -9,6 +10,16 @@ class VideoInfo(BaseModel):
     view_count: Optional[str] = None
     like_count: Optional[str] = None
     duration: Optional[str] = None 
+    upload_date: Optional[str] = None
+    uploader: Optional[str] = None
+    @field_serializer("duration")
+    def serialize_duration(duration: str):
+        # serialize duration into hours, minutes and seconds
+        time = int(duration)
+        duration = datetime.timedelta(seconds=time)
+        return str(duration)
+        
+    
     
 
 

@@ -1,6 +1,10 @@
 from fastapi import  FastAPI
 from fastapi.responses import ORJSONResponse
 
+from app.schemas.schema import VideoRequest
+
+from app.services.downloadHandler import get_information
+
 app = FastAPI(
     title="Youtube Downloader",
     description="An REST-API service for downloading youtube videos and audios",
@@ -8,7 +12,11 @@ app = FastAPI(
     default_response_class=ORJSONResponse
     )
 
-
+app.post("/extract_video_info")
+async def extract_info(request: VideoRequest):
+    url = request.url
+    return await get_information(url)
+    
 
 
 

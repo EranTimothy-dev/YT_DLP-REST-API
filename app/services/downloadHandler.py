@@ -1,16 +1,19 @@
-import sys
+import re
 import os
-# SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-# sys.path.append(os.path.dirname(SCRIPT_DIR))
-import app.services.DownloadOptions as VOps
-import ExtractionOptions as EOps
-import PlaylistOptions as PLOps
-import LiveStreamOptions as LSOps
-# from DownloadsPath import get_non_windows_download_folder, get_windows_download_folder
 import base64
 
+from app.schemas.schema import VideoInfo, VideoResponse
+
+import app.services.DownloadOptions as VOps
+import app.services.ExtractionOptions as EOps
+import app.services.PlaylistOptions as PLOps
+import app.services.LiveStreamOptions as LSOps
+
+from ThreadRV import ThreadWithReturnValue as TWRV
 
 IMAGE_PATH = f'thumbnail_filepath\\{os.listdir("thumbnail\\")[0]}'
+
+
 
 
 def convert_image_to_base64():
@@ -26,11 +29,30 @@ def convert_image_to_base64():
 
 
 def get_information(url,thumbnail_path = "thumbnail\\"):
+    
+    video_info = {}
     qualities_available = list(EOps.get_available_quality(url)) 
     EOps.getThumbnail(url, thumbnail_path)
     image_bytecode = convert_image_to_base64()
+    # regex pattern to extract required information
+    pattern = r"'%\((\w+)\)s': ['\"](.*)['\"]"
+
+    t1 = TWRV(target=EOps.extract_video_info, args=(url,))
+    t1.start()
+    info = t1.join()
     
-    
+    for line in info.stdout:
+        match = re.search(pattern, line.strip())
+        if match:
+            video_info[match.group(1)] = match.group(2)
+        else:
+            continue
+
+    video_info["thumbnail"] = image_bytecode
+    ExtractedInfo = VideoInfo(**video_info)
+    return VideoResponse(video_info=ExtractedInfo,available_resolutions=qualities_available)
+            
+
 
 
 
