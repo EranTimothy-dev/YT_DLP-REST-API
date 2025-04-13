@@ -11,7 +11,8 @@ import app.services.LiveStreamOptions as LSOps
 
 from app.services.ThreadRV import ThreadWithReturnValue as TWRV
 
-IMAGE_PATH = f'thumbnail_filepath\\{os.listdir("thumbnail\\")[0]}'
+IMAGE_PATH = f'thumbnail\\{os.listdir("thumbnail\\")[0]}'
+THUMBNAIL_PATH = f'thumbnail\\'
 
 
 
@@ -31,7 +32,7 @@ def convert_image_to_base64():
 def get_information(url,thumbnail_path = "thumbnail\\"):
     
     video_info = {}
-    qualities_available = list(EOps.get_available_quality(url)) 
+    qualities_available = EOps.get_available_quality(url)
     EOps.getThumbnail(url, thumbnail_path)
     image_bytecode = convert_image_to_base64()
     # regex pattern to extract required information
