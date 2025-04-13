@@ -1,7 +1,7 @@
 from fastapi import  FastAPI
 from fastapi.responses import ORJSONResponse
 
-from app.schemas.schema import VideoRequest
+from app.schemas.schema import VideoRequest, VideoResponse
 
 from app.services.downloadHandler import get_information
 
@@ -14,7 +14,7 @@ app = FastAPI(
 
     
 @app.post("/extract_video_info")
-async def extract_info(request: VideoRequest):
+async def extract_info(request: VideoRequest) -> VideoResponse:
     url = request.url
     video_response = await get_information(url)
     return video_response
