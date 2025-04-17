@@ -25,11 +25,13 @@ async def extract_info(request: VideoRequest) -> VideoResponse:
 
 @app.post("/download_video")
 async def download_yt_video(request: Optional[DownloadRequest]) -> dict:
-    download_thread = ThreadWithReturnValue(target=download_video, args=(request.url,request.quality,request.extension,))
-    download_thread.start()
-    download_status = download_thread.join()
-    for line in download_status.stdout:
+    download = download_video(request.url, request.quality, request.extension)
+    # count = 0
+    for line in download.stdout:
         print(f"\r{line.strip():<150}", end="",flush=True) # make sure the progress is printied on the same line
+        # count += 1
+        # if count == 5:
+        #     download.terminate()
         # print(line.strip())
     print("\n Download Completed!")
     return {"ok": True}
