@@ -18,9 +18,6 @@ class VideoInfo(BaseModel):
         time = int(duration)
         duration = datetime.timedelta(seconds=time)
         return str(duration)
-        
-    
-    
 
 
 class VideoRequest(BaseModel):
@@ -32,3 +29,8 @@ class VideoResponse(BaseModel):
     available_extensions: Set[str] = Field(default_factory=lambda: {"mp4","webm","mkv"})
     available_resolutions: Set[Tuple[str,str]]
     
+
+class DownloadRequest(BaseModel):
+    url: str
+    quality: str
+    extension: str
