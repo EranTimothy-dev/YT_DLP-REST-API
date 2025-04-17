@@ -40,12 +40,14 @@ def convert_image_to_base64():
 async def get_information(url,thumbnail_path = "thumbnail\\"):
     
     video_info = {}
+    # regex pattern to extract required information
+    pattern = r"'%\((\w+)\)s': ['\"](.*)['\"]"
+
     logger.info("Getting video quality")
     qualities_available = EOps.get_available_quality(url)
     EOps.getThumbnail(url, thumbnail_path)
     image_bytecode = convert_image_to_base64()
-    # regex pattern to extract required information
-    pattern = r"'%\((\w+)\)s': ['\"](.*)['\"]"
+    
     logger.info("Extracting video information")
     t1 = TWRV(target=EOps.extract_video_info, args=(url,))
     t1.start()
