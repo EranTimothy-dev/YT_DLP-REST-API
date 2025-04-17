@@ -3,6 +3,7 @@ import os
 import base64
 
 from app.schemas.schema import VideoInfo, VideoResponse
+from app.middleware.logger import logger
 
 import app.services.DownloadOptions as VOps
 import app.services.ExtractionOptions as EOps
@@ -11,20 +12,27 @@ import app.services.LiveStreamOptions as LSOps
 
 from app.services.ThreadRV import ThreadWithReturnValue as TWRV
 
-IMAGE_PATH = f'thumbnail\\{os.listdir("thumbnail\\")[0]}'
+# IMAGE_PATH = f'thumbnail\\{os.listdir("thumbnail\\")[0]}'
 THUMBNAIL_PATH = f'thumbnail\\'
 
 
 
 
+
 def convert_image_to_base64():
+    files = os.listdir(THUMBNAIL_PATH)
+    # print(files)
     try:
-        with open(IMAGE_PATH, "rb") as image_file:
+        with open(f"{THUMBNAIL_PATH}\\{files[0]}", "rb") as image_file:
+            logger.info(f"Converting thumbnail to base64")
             encoded_string = base64.b64encode(image_file.read())
         return encoded_string
     except Exception as e:
         print(f"Error converting image to base64: {str(e)}")
         return None
+    finally:
+        logger.info(f"Removing thumbnail")   
+        os.remove(f"{THUMBNAIL_PATH}\\{files[0]}")
 
 
 
@@ -32,12 +40,13 @@ def convert_image_to_base64():
 async def get_information(url,thumbnail_path = "thumbnail\\"):
     
     video_info = {}
+    logger.info("Getting video quality")
     qualities_available = EOps.get_available_quality(url)
     EOps.getThumbnail(url, thumbnail_path)
     image_bytecode = convert_image_to_base64()
     # regex pattern to extract required information
     pattern = r"'%\((\w+)\)s': ['\"](.*)['\"]"
-
+    logger.info("Extracting video information")
     t1 = TWRV(target=EOps.extract_video_info, args=(url,))
     t1.start()
     info = t1.join()
@@ -48,7 +57,8 @@ async def get_information(url,thumbnail_path = "thumbnail\\"):
             video_info[match.group(1)] = match.group(2)
         else:
             continue
-
+    
+    logger.info("Finalizing video information")
     video_info["thumbnail"] = image_bytecode
     ExtractedInfo = VideoInfo(**video_info)
     return VideoResponse(video_info=ExtractedInfo,available_resolutions=qualities_available)
