@@ -7,7 +7,7 @@ from app.services.ExtractionOptions import getThumbnail, extract_video_info, ext
 from app.services.DownloadOptions import download_video, download_age_restricted_video, download_audio
 import threading
 import time
-from app.services.downloadHandler import get_information
+from app.services.downloadHandler import get_information, convert_image_to_base64
 
 playlist_url = "https://youtube.com/playlist?list=PLbpi6ZahtOH7c6nDA9YG3QcyRGbZ4xDFn&si=TClA3jkK99Ce2DRl"
 url = "https://youtu.be/Js6H70-eADY?si=fF6a5sRPprlb1MDr"
@@ -33,9 +33,12 @@ class ThreadWithReturnValue(threading.Thread):
 
 
 input_url = input("Enter youtube video url: ")
-vid_info = get_information(input_url)
-print(vid_info.video_info.title)
-print(vid_info.available_resolutions)
+# getThumbnail(input_url,thumbnail_filepath)
+image_bytecode = convert_image_to_base64()
+print(image_bytecode)
+# vid_info = get_information(input_url)
+# print(vid_info.video_info.title)
+# print(vid_info.available_resolutions)
 
 input_url2 = input("Enter youtube video url: ")
 availbale_quality = get_available_quality(input_url)
@@ -50,7 +53,7 @@ for count,quality in enumerate(availbale_quality,1):
 # extension = input("Enter video extension: ")
 # t1 = ThreadWithReturnValue(target=download_video, args=(input_url,quality,extension,))
 # t1 = ThreadWithReturnValue(target=download_audio, args=(input_url,))
-t1 = ThreadWithReturnValue(target=extract_video_info, args=(input_url,))
+t1 = ThreadWithReturnValue(target=extract_video_info, args=(input_url2,))
 # t2 = ThreadWithReturnValue(target=extract_video_info, args=(input_url2,))
 t1.start()
 # t2.start()
