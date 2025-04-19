@@ -64,7 +64,8 @@ async def download_yt_video(request: Optional[DownloadRequest], response: Respon
                 return
             loop.call_soon_threadsafe(progress_queue.put_nowait, line)
             print(f"\r{line.strip():<150}", end="",flush=True) # make sure the progress is printied on the same line
-        download.wait()
+        # download.wait()
+        download.returncode = None
 
     await asyncio.to_thread(downloader)
     if download.returncode is None:
