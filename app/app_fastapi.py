@@ -3,7 +3,6 @@ from fastapi.responses import ORJSONResponse, HTMLResponse
 from typing import Optional
 from subprocess import Popen
 from signal import SIGTERM
-import signal
 import asyncio
 import psutil
 
@@ -34,7 +33,6 @@ async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
     try:
         while True:
-            # if download is not None:
             message = await progress_queue.get()
             await websocket.send_text(f"{message}")
     except WebSocketDisconnect:
@@ -64,7 +62,6 @@ async def download_yt_video(request: Optional[DownloadRequest], response: Respon
                 except Exception as e:
                     print(f"Error occurred: {str(e)}")
                 return
-            # asyncio.run(progress_queue.put(line))
             loop.call_soon_threadsafe(progress_queue.put_nowait, line)
             print(f"\r{line.strip():<150}", end="",flush=True) # make sure the progress is printied on the same line
         download.wait()
@@ -80,7 +77,6 @@ async def download_yt_video(request: Optional[DownloadRequest], response: Respon
 @app.post("/stop_download")
 async def stop_download(response: Response):
     global download
-    # global loop
     if isinstance(download,Popen):
         try:
             parent = psutil.Process(download.pid)
@@ -93,10 +89,6 @@ async def stop_download(response: Response):
             print(f"Error killing process tree: {e}")
         response.status_code = status.HTTP_200_OK
         download.returncode = SIGTERM
-        # download.send_signal(signal.CTRL_BREAK_EVENT)
-        # download.terminate()
-        # download.kill()
-        # loop.stop()
         print("\n Download Stopped!")
         return {response.status_code: "Download Stopped!"}
     elif download is None:
