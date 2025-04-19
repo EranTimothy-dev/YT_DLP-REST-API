@@ -1,5 +1,5 @@
 import subprocess
-
+from subprocess import CREATE_NEW_PROCESS_GROUP
 
 
 def download_audio(url):
@@ -11,7 +11,7 @@ def download_audio(url):
 
 def download_video(url,quality,extension):
     cmd = ['yt-dlp', url,"-f", f"bv*[height={quality}]+ba","--merge-output-format", f"{extension}", "-P", "downloads\\", "-P", "temp:temp\\","--windows-filenames","-N", "4"]
-    process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, universal_newlines=True, bufsize=1, encoding="utf-8")
+    process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, universal_newlines=True, bufsize=1, encoding="utf-8", creationflags=CREATE_NEW_PROCESS_GROUP)
     return process
     # subprocess.run(cmd, text = True, check=True)
 
