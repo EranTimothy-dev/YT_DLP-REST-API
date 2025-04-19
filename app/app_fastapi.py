@@ -2,11 +2,10 @@ from fastapi import  FastAPI, Response, status
 from fastapi.responses import ORJSONResponse
 from typing import Optional
 from subprocess import Popen
-from concurrent.futures import ThreadPoolExecutor
+from signal import SIGTERM
 import asyncio
 
 from app.schemas.schema import VideoRequest, VideoResponse, DownloadRequest
-from app.services.ThreadRV import ThreadWithReturnValue
 from app.services.downloadHandler import get_information
 from app.services.DownloadOptions import download_video
 
@@ -38,7 +37,7 @@ async def download_yt_video(request: Optional[DownloadRequest], response: Respon
             print(f"\r{line.strip():<150}", end="",flush=True) # make sure the progress is printied on the same line
 
     await asyncio.to_thread(downloader)
-    if download.poll() is None:
+    if download.returncode is None:
         response.status_code = status.HTTP_200_OK
         return {response.status_code: "Download completed!"}
     else:
@@ -49,6 +48,8 @@ async def download_yt_video(request: Optional[DownloadRequest], response: Respon
 async def stop_download(response: Response):
     global download
     if isinstance(download,Popen):
+        response.status_code = status.HTTP_200_OK
+        download.returncode = SIGTERM
         download.terminate()
         print("\n Download Stopped!")
         return {response.status_code: "Download Stopped!"}
