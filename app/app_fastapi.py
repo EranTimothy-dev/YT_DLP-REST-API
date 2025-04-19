@@ -1,4 +1,4 @@
-from fastapi import  FastAPI
+from fastapi import  FastAPI, Response, status
 from fastapi.responses import ORJSONResponse
 from typing import Optional
 from subprocess import Popen
@@ -28,7 +28,7 @@ async def extract_info(request: VideoRequest) -> VideoResponse:
     
 
 @app.post("/download_video")
-async def download_yt_video(request: Optional[DownloadRequest]) -> dict:
+async def download_yt_video(request: Optional[DownloadRequest], response: Response) -> dict:
     global download
 
     def downloader():
@@ -38,17 +38,23 @@ async def download_yt_video(request: Optional[DownloadRequest]) -> dict:
             print(f"\r{line.strip():<150}", end="",flush=True) # make sure the progress is printied on the same line
 
     await asyncio.to_thread(downloader)
-    return {200: "Download completed!"}
+    if download.poll() is None:
+        response.status_code = status.HTTP_200_OK
+        return {response.status_code: "Download completed!"}
+    else:
+        response.status_code = status.HTTP_409_CONFLICT
+        return {response.status_code: "Client cancelled download!"}
 
 @app.post("/stop_download")
-async def stop_download():
+async def stop_download(response: Response):
     global download
     if isinstance(download,Popen):
         download.terminate()
         print("\n Download Stopped!")
-        return {200: "Download Stopped!"}
+        return {response.status_code: "Download Stopped!"}
     elif download is None:
-        return {406: "No download runnning"}
+        response.status_code = status.HTTP_406_NOT_ACCEPTABLE
+        return {response.status_code: "No download runnning"}
     
 
 @app.post("/test")
