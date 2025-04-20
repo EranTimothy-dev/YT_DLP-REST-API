@@ -35,3 +35,12 @@ cd youtube-downloader-backend
 ```bash
 pip install -r requirements.txt
 ```
+```bash
+setup.sh
+```
+
+### Running the server
+
+```bash
+uvicorn app.app_fastapi:app --reload
+```
