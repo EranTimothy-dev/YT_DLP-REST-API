@@ -1,14 +1,18 @@
-from fastapi import  FastAPI, Response, status
-from fastapi.responses import ORJSONResponse
+from fastapi import  FastAPI, Response, status, WebSocket, WebSocketDisconnect
+from fastapi.responses import ORJSONResponse, HTMLResponse
 from typing import Optional
 from subprocess import Popen
 from signal import SIGTERM
 import asyncio
+import psutil
 
 from app.schemas.schema import VideoRequest, VideoResponse, DownloadRequest
 from app.services.downloadHandler import get_information
 from app.services.DownloadOptions import download_video
 
+download: Popen[str] = None
+loop = asyncio.get_event_loop()
+audio_progress_queue = asyncio.Queue()
 
 app = FastAPI(
     title="Youtube Downloader",
@@ -17,7 +21,6 @@ app = FastAPI(
     default_response_class=ORJSONResponse
     )
 
-download: Popen[str] = None
     
 @app.post("/extract_video_info")
 async def extract_info(request: VideoRequest) -> VideoResponse:
@@ -25,17 +28,47 @@ async def extract_info(request: VideoRequest) -> VideoResponse:
     video_response = await get_information(url)
     return video_response
     
+@app.websocket("/ws")
+async def websocket_endpoint(websocket: WebSocket):
+    global download
+    await websocket.accept()
+    try:
+        while True:
+            message = await audio_progress_queue.get()
+            await websocket.send_text(f"{message}")
+    except WebSocketDisconnect:
+        print("Client disconnected")
+    except asyncio.exceptions.CancelledError:
+        print("Force Cancelled Client Connection")
+
+
 
 @app.post("/download_video")
 async def download_yt_video(request: Optional[DownloadRequest], response: Response) -> dict:
     global download
+    
 
     def downloader():
+        global loop
         global download
         download = download_video(request.url, request.quality, request.extension)
         for line in download.stdout:
+            # backup termination code snippet
+            # if download.returncode == SIGTERM:
+            #     print("Stopping Download")
+            #     try:
+            #         download.terminate()
+            #     except RuntimeError:
+            #         print("Runtime error occurred")
+            #     except Exception as e:
+            #         print(f"Error occurred: {str(e)}")
+            #     return
+            loop.call_soon_threadsafe(audio_progress_queue.put_nowait, line)
             print(f"\r{line.strip():<150}", end="",flush=True) # make sure the progress is printied on the same line
+        # download.wait()
+        download.returncode = None
 
+    # run sync function asynchronously as a thread
     await asyncio.to_thread(downloader)
     if download.returncode is None:
         response.status_code = status.HTTP_200_OK
@@ -48,9 +81,18 @@ async def download_yt_video(request: Optional[DownloadRequest], response: Respon
 async def stop_download(response: Response):
     global download
     if isinstance(download,Popen):
+        try:
+            # terminate all process of download, created by ytdlp and ffmpeg
+            parent = psutil.Process(download.pid)
+            children = parent.children(recursive=True)
+            for child in children:
+                child.kill()
+            parent.kill()
+            print("Killed process and its children.")
+        except Exception as e:
+            print(f"Error killing process tree: {e}")
         response.status_code = status.HTTP_200_OK
         download.returncode = SIGTERM
-        download.terminate()
         print("\n Download Stopped!")
         return {response.status_code: "Download Stopped!"}
     elif download is None:
@@ -62,7 +104,44 @@ async def stop_download(response: Response):
 async def test_endpoint(request: dict):
     return {"ok": True}
 
+html = """
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Chat</title>
+    </head>
+    <body>
+        <h1>WebSocket Chat</h1>
+        <form action="" onsubmit="sendMessage(event)">
+            <input type="text" id="messageText" autocomplete="off"/>
+            <button>Send</button>
+        </form>
+        <ul id='messages'>
+        </ul>
+        <script>
+            var ws = new WebSocket("ws://localhost:8000/ws");
+            ws.onmessage = function(event) {
+                var messages = document.getElementById('messages')
+                var message = document.createElement('li')
+                var content = document.createTextNode(event.data)
+                message.appendChild(content)
+                messages.appendChild(message)
+            };
+            function sendMessage(event) {
+                var input = document.getElementById("messageText")
+                ws.send(input.value)
+                input.value = ''
+                event.preventDefault()
+            }
+        </script>
+    </body>
+</html>
+"""
 
+
+@app.get("/")
+async def get():
+    return HTMLResponse(html)
 
 if __name__ == "__main__":
     import uvicorn
