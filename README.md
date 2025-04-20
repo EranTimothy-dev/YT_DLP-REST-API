@@ -27,10 +27,10 @@ A robust backend service built with **FastAPI**, **yt-dlp**, and **FFmpeg** for 
 ### Installation
 
 ```bash
-git clone https://github.com/EranTimothy-dev/youtube-downloader-backend.git
+git https://github.com/EranTimothy-dev/YT_VAD-Backend.gitclone
 ```
 ```bash
-cd youtube-downloader-backend
+cd YT_VAD-Backend
 ```
 ```bash
 pip install -r requirements.txt
