@@ -12,7 +12,8 @@ from app.services.DownloadOptions import download_video
 
 download: Popen[str] = None
 loop = asyncio.get_event_loop()
-audio_progress_queue = asyncio.Queue()
+video_progress_queue = asyncio.Queue()
+
 
 app = FastAPI(
     title="Youtube Downloader",
@@ -34,7 +35,7 @@ async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
     try:
         while True:
-            message = await audio_progress_queue.get()
+            message = await video_progress_queue.get()
             await websocket.send_text(f"{message}")
     except WebSocketDisconnect:
         print("Client disconnected")
@@ -63,7 +64,7 @@ async def download_yt_video(request: Optional[DownloadRequest], response: Respon
             #     except Exception as e:
             #         print(f"Error occurred: {str(e)}")
             #     return
-            loop.call_soon_threadsafe(audio_progress_queue.put_nowait, line)
+            loop.call_soon_threadsafe(video_progress_queue.put_nowait, line)
             print(f"\r{line.strip():<150}", end="",flush=True) # make sure the progress is printied on the same line
         # download.wait()
         download.returncode = None
