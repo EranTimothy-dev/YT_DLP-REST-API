@@ -10,7 +10,9 @@ from app.schemas.schema import VideoRequest, VideoResponse, DownloadRequest
 from app.services.downloadHandler import get_information
 from app.services.DownloadOptions import download_video
 
-progress_queue = asyncio.Queue()
+download: Popen[str] = None
+loop = asyncio.get_event_loop()
+audio_progress_queue = asyncio.Queue()
 
 app = FastAPI(
     title="Youtube Downloader",
@@ -19,7 +21,6 @@ app = FastAPI(
     default_response_class=ORJSONResponse
     )
 
-download: Popen[str] = None
     
 @app.post("/extract_video_info")
 async def extract_info(request: VideoRequest) -> VideoResponse:
@@ -33,7 +34,7 @@ async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
     try:
         while True:
-            message = await progress_queue.get()
+            message = await audio_progress_queue.get()
             await websocket.send_text(f"{message}")
     except WebSocketDisconnect:
         print("Client disconnected")
@@ -41,7 +42,6 @@ async def websocket_endpoint(websocket: WebSocket):
         print("Force Cancelled Client Connection")
 
 
-loop = asyncio.get_event_loop()
 
 @app.post("/download_video")
 async def download_yt_video(request: Optional[DownloadRequest], response: Response) -> dict:
@@ -53,20 +53,22 @@ async def download_yt_video(request: Optional[DownloadRequest], response: Respon
         global download
         download = download_video(request.url, request.quality, request.extension)
         for line in download.stdout:
-            if download.returncode == SIGTERM:
-                print("Stopping Download")
-                try:
-                    download.terminate()
-                except RuntimeError:
-                    print("Runtime error occurred")
-                except Exception as e:
-                    print(f"Error occurred: {str(e)}")
-                return
-            loop.call_soon_threadsafe(progress_queue.put_nowait, line)
+            # backup termination code snippet
+            # if download.returncode == SIGTERM:
+            #     print("Stopping Download")
+            #     try:
+            #         download.terminate()
+            #     except RuntimeError:
+            #         print("Runtime error occurred")
+            #     except Exception as e:
+            #         print(f"Error occurred: {str(e)}")
+            #     return
+            loop.call_soon_threadsafe(audio_progress_queue.put_nowait, line)
             print(f"\r{line.strip():<150}", end="",flush=True) # make sure the progress is printied on the same line
         # download.wait()
         download.returncode = None
 
+    # run sync function asynchronously as a thread
     await asyncio.to_thread(downloader)
     if download.returncode is None:
         response.status_code = status.HTTP_200_OK
@@ -80,6 +82,7 @@ async def stop_download(response: Response):
     global download
     if isinstance(download,Popen):
         try:
+            # terminate all process of download, created by ytdlp and ffmpeg
             parent = psutil.Process(download.pid)
             children = parent.children(recursive=True)
             for child in children:
