@@ -12,7 +12,7 @@ from app.services.DownloadOptions import download_video
 
 download: Popen[str] = None
 loop = asyncio.get_event_loop()
-video_progress_queue = asyncio.Queue()
+progress_queue = asyncio.Queue()
 
 
 app = FastAPI(
@@ -30,12 +30,12 @@ async def extract_info(request: VideoRequest) -> VideoResponse:
     return video_response
     
 @app.websocket("/ws")
-async def websocket_endpoint(websocket: WebSocket):
+async def video_websocket_endpoint(websocket: WebSocket):
     global download
     await websocket.accept()
     try:
         while True:
-            message = await video_progress_queue.get()
+            message = await progress_queue.get()
             await websocket.send_text(f"{message}")
     except WebSocketDisconnect:
         print("Client disconnected")
@@ -47,7 +47,6 @@ async def websocket_endpoint(websocket: WebSocket):
 @app.post("/download_video")
 async def download_yt_video(request: Optional[DownloadRequest], response: Response) -> dict:
     global download
-    
 
     def downloader():
         global loop
@@ -64,7 +63,7 @@ async def download_yt_video(request: Optional[DownloadRequest], response: Respon
             #     except Exception as e:
             #         print(f"Error occurred: {str(e)}")
             #     return
-            loop.call_soon_threadsafe(video_progress_queue.put_nowait, line)
+            loop.call_soon_threadsafe(progress_queue.put_nowait, line)
             print(f"\r{line.strip():<150}", end="",flush=True) # make sure the progress is printied on the same line
         # download.wait()
         download.returncode = None
@@ -77,6 +76,28 @@ async def download_yt_video(request: Optional[DownloadRequest], response: Respon
     else:
         response.status_code = status.HTTP_409_CONFLICT
         return {response.status_code: "Client cancelled download!"}
+
+
+@app.post("/download_audio")
+async def download_yt_audio(request: Optional[DownloadRequest], response: Response) -> dict:
+    global download
+    def downloader():
+        global loop
+        global download
+        download = download_audio(request.url)
+        for line in download.stdout:
+            loop.call_soon_threadsafe(progress_queue.put_nowait, line)
+            print(f"\r{line.strip():<150}", end="",flush=True) # make sure the progress is printied on the same line
+        download.returncode = None
+
+    await asyncio.to_thread(downloader)
+    if download.returncode is None:
+        response.status_code = status.HTTP_200_OK
+        return {response.status_code: "Download completed!"}
+    else:
+        response.status_code = status.HTTP_409_CONFLICT
+        return {response.status_code: "Client cancelled download!"}
+
 
 @app.post("/stop_download")
 async def stop_download(response: Response):
