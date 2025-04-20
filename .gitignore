@@ -10,3 +10,4 @@ requirements1.txt
 # test/*
 # test/
 youtube_downloader.egg-info/
+status.log
