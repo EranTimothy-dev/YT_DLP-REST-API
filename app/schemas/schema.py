@@ -4,7 +4,7 @@ import datetime
 
 # create schemas 
 class VideoInfo(BaseModel):
-    title: str
+    title: Optional[str] = None
     description: Optional[str] = None
     thumbnail: Optional[str] = None
     view_count: Optional[str] = None
@@ -18,6 +18,10 @@ class VideoInfo(BaseModel):
         time = int(duration)
         duration = datetime.timedelta(seconds=time)
         return str(duration)
+    @field_serializer("upload_date")
+    def serialize_upload_date(upload_date: str):
+        upload_date = datetime.datetime.strptime(upload_date, "%Y%m%d")
+        return str(upload_date)
 
 
 class VideoRequest(BaseModel):
@@ -32,5 +36,5 @@ class VideoResponse(BaseModel):
 
 class DownloadRequest(BaseModel):
     url: str
-    quality: str
-    extension: str
+    quality: Optional[str]
+    extension: Optional[str]
