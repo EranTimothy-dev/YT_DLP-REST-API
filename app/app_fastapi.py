@@ -1,19 +1,9 @@
-from fastapi import  FastAPI, Response, status, WebSocket, WebSocketDisconnect
-from fastapi.responses import ORJSONResponse, HTMLResponse
-from typing import Optional
-from subprocess import Popen
-from signal import SIGTERM
-import asyncio
-import psutil
+from fastapi import  FastAPI
+from fastapi.responses import ORJSONResponse
+from app.middleware.logger import configure_logging, LogLevels
+from app.middleware.routes import register_routes
 
-from app.schemas.schema import VideoRequest, VideoResponse, DownloadRequest
-from app.services.downloadHandler import get_information
-from app.services.DownloadOptions import download_video
-
-download: Popen[str] = None
-loop = asyncio.get_event_loop()
-progress_queue = asyncio.Queue()
-
+configure_logging(log_level=LogLevels.debug)
 
 app = FastAPI(
     title="Youtube Downloader",
@@ -22,95 +12,98 @@ app = FastAPI(
     default_response_class=ORJSONResponse
     )
 
+register_routes(app)
     
-@app.post("/extract_video_info")
-async def extract_info(request: VideoRequest) -> VideoResponse:
-    url = request.url
-    video_response = await get_information(url)
-    return video_response
-    
-@app.websocket("/ws")
-async def video_websocket_endpoint(websocket: WebSocket):
-    global download
-    await websocket.accept()
-    try:
-        while True:
-            message = await progress_queue.get()
-            await websocket.send_text(f"{message}")
-    except WebSocketDisconnect:
-        print("Client disconnected")
-    except asyncio.exceptions.CancelledError:
-        print("Force Cancelled Client Connection")
-
-
-
-@app.post("/download_video")
-async def download_yt_video(request: Optional[DownloadRequest], response: Response) -> dict:
-    global download
-
-    def downloader():
-        global loop
-        global download
-        download = download_video(request.url, request.quality, request.extension)
-        for line in download.stdout:
-            loop.call_soon_threadsafe(progress_queue.put_nowait, line)
-            print(f"\r{line.strip():<150}", end="",flush=True) # make sure the progress is printied on the same line
-        download.returncode = None
-
-    # run sync function asynchronously as a thread
-    await asyncio.to_thread(downloader)
-    if download.returncode is None:
-        response.status_code = status.HTTP_200_OK
-        return {response.status_code: "Download completed!"}
-    else:
-        response.status_code = status.HTTP_409_CONFLICT
-        return {response.status_code: "Client cancelled download!"}
-
-
-@app.post("/download_audio")
-async def download_yt_audio(request: Optional[DownloadRequest], response: Response) -> dict:
-    global download
-    def downloader():
-        global loop
-        global download
-        download = download_audio(request.url)
-        for line in download.stdout:
-            loop.call_soon_threadsafe(progress_queue.put_nowait, line)
-            print(f"\r{line.strip():<150}", end="",flush=True) # make sure the progress is printied on the same line
-        download.returncode = None
-
-    await asyncio.to_thread(downloader)
-    if download.returncode is None:
-        response.status_code = status.HTTP_200_OK
-        return {response.status_code: "Download completed!"}
-    else:
-        response.status_code = status.HTTP_409_CONFLICT
-        return {response.status_code: "Client cancelled download!"}
-
-
-@app.post("/stop_download")
-async def stop_download(response: Response):
-    global download
-    if isinstance(download,Popen):
-        try:
-            # terminate all process of download, created by ytdlp and ffmpeg
-            parent = psutil.Process(download.pid)
-            children = parent.children(recursive=True)
-            for child in children:
-                child.kill()
-            parent.kill()
-            print("Killed process and its children.")
-        except Exception as e:
-            print(f"Error killing process tree: {e}")
-        response.status_code = status.HTTP_200_OK
-        download.returncode = SIGTERM
-        print("\n Download Stopped!")
-        return {response.status_code: "Download Stopped!"}
-    elif download is None:
-        response.status_code = status.HTTP_406_NOT_ACCEPTABLE
-        return {response.status_code: "No download runnning"}
-    
-
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
+
+    
+
+# @app.post("/extract_video_info")
+# async def extract_info(request: VideoRequest) -> VideoResponse:
+#     url = request.url
+#     video_response = await get_information(url)
+#     return video_response
+    
+# @app.websocket("/ws")
+# async def video_websocket_endpoint(websocket: WebSocket):
+#     global download
+#     await websocket.accept()
+#     try:
+#         while True:
+#             message = await progress_queue.get()
+#             await websocket.send_text(f"{message}")
+#     except WebSocketDisconnect:
+#         print("Client disconnected")
+#     except asyncio.exceptions.CancelledError:
+#         print("Force Cancelled Client Connection")
+
+
+
+# @app.post("/download_video")
+# async def download_yt_video(request: Optional[DownloadRequest], response: Response) -> dict:
+#     global download
+
+#     def downloader():
+#         global loop
+#         global download
+#         download = download_video(request.url, request.quality, request.extension)
+#         for line in download.stdout:
+#             loop.call_soon_threadsafe(progress_queue.put_nowait, line)
+#             print(f"\r{line.strip():<150}", end="",flush=True) # make sure the progress is printied on the same line
+#         download.returncode = None
+
+#     # run sync function asynchronously as a thread
+#     await asyncio.to_thread(downloader)
+#     if download.returncode is None:
+#         response.status_code = status.HTTP_200_OK
+#         return {response.status_code: "Download completed!"}
+#     else:
+#         response.status_code = status.HTTP_409_CONFLICT
+#         return {response.status_code: "Client cancelled download!"}
+
+
+# @app.post("/download_audio")
+# async def download_yt_audio(request: Optional[DownloadRequest], response: Response) -> dict:
+#     global download
+#     def downloader():
+#         global loop
+#         global download
+#         download = download_audio(request.url)
+#         for line in download.stdout:
+#             loop.call_soon_threadsafe(progress_queue.put_nowait, line)
+#             print(f"\r{line.strip():<150}", end="",flush=True) # make sure the progress is printied on the same line
+#         download.returncode = None
+
+#     await asyncio.to_thread(downloader)
+#     if download.returncode is None:
+#         response.status_code = status.HTTP_200_OK
+#         return {response.status_code: "Download completed!"}
+#     else:
+#         response.status_code = status.HTTP_409_CONFLICT
+#         return {response.status_code: "Client cancelled download!"}
+
+
+# @app.post("/stop_download")
+# async def stop_download(response: Response):
+#     global download
+#     if isinstance(download,Popen):
+#         try:
+#             # terminate all process of download, created by ytdlp and ffmpeg
+#             parent = psutil.Process(download.pid)
+#             children = parent.children(recursive=True)
+#             for child in children:
+#                 child.kill()
+#             parent.kill()
+#             print("Killed process and its children.")
+#         except Exception as e:
+#             print(f"Error killing process tree: {e}")
+#         response.status_code = status.HTTP_200_OK
+#         download.returncode = SIGTERM
+#         print("\n Download Stopped!")
+#         return {response.status_code: "Download Stopped!"}
+#     elif download is None:
+#         response.status_code = status.HTTP_406_NOT_ACCEPTABLE
+#         return {response.status_code: "No download runnning"}
+    
