@@ -32,40 +32,47 @@ class ThreadWithReturnValue(threading.Thread):
         return self._return
 
 
-input_url = input("Enter youtube video url: ")
+# input_url = input("Enter youtube video url: ")
 # getThumbnail(input_url,thumbnail_filepath)
-image_bytecode = convert_image_to_base64()
-print(image_bytecode)
+# image_bytecode = convert_image_to_base64()
+# print(image_bytecode)
 # vid_info = get_information(input_url)
 # print(vid_info.video_info.title)
 # print(vid_info.available_resolutions)
 
-input_url2 = input("Enter youtube video url: ")
-availbale_quality = get_available_quality(input_url)
-available_extensions = {"mp4","webm","mkv"}
-print("available extensions: ",available_extensions)
+# input_url2 = input("Enter youtube video url: ")
+# availbale_quality = get_available_quality(input_url)
+# available_extensions = {"mp4","webm","mkv"}
+# print("available extensions: ",available_extensions)
 # print(availbale_quality)
-print("available quality: ")
-for count,quality in enumerate(availbale_quality,1):
-    print(f"{count}. {quality[0]}x{quality[1]}")    
+# print("available quality: ")
+# for count,quality in enumerate(availbale_quality,1):
+#     print(f"{count}. {quality[0]}x{quality[1]}")    
 
 # quality = input("Enter video quality: ")
 # extension = input("Enter video extension: ")
 # t1 = ThreadWithReturnValue(target=download_video, args=(input_url,quality,extension,))
 # t1 = ThreadWithReturnValue(target=download_audio, args=(input_url,))
-t1 = ThreadWithReturnValue(target=extract_video_info, args=(input_url2,))
+# t1 = ThreadWithReturnValue(target=extract_video_info, args=(input_url2,))
+t1 = ThreadWithReturnValue(target=extract_playlist_info, args=(playlist_url,))
 # t2 = ThreadWithReturnValue(target=extract_video_info, args=(input_url2,))
 t1.start()
 # t2.start()
 # time.sleep(1)
 # t1._stop()
-info = t1.join()
+info, pl = t1.join()
 # info2 = t2.join()
-# for line in info.stdout:
-#     # print(f"\r{line.strip():<150}", end="",flush=True) # make sure the progress is printied on the same line
-#     print(line.strip())
-#     # print(info2.stdout)
-# print("\n\n")
+for line in pl.stdout:
+    # print(f"\r{line.strip():<150}", end="",flush=True) # make sure the progress is printied on the same line
+    # print(line.strip())
+    print(line)
+    # print(info2.stdout)
+print("\n\n")
+
+for line in info.stdout:
+    # print(f"\r{line.strip():<150}", end="",flush=True) # make sure the progress is printied on the same line
+    print(line.strip())
+    # print(info2.stdout)
 
 # for line in info2.stdout:
 #     # print(f"\r{line.strip():<150}", end="",flush=True) # make sure the progress is printied on the same line
@@ -81,24 +88,24 @@ text = "'%(title)s': '#1 Connecting to Postgres with SQLAlchemy & Docker | FastA
 pattern = r"'%\((\w+)\)s': ['\"](.*)['\"]"
 
 
-def print1(info, number):
-    for line in info.stdout:
-        # print(f"this is the {number} thread")
-        # print(line.strip())
-        match = re.search(pattern, line.strip())  # match() checks from the beginning of the string
-        if match:
-            # print("Pattern matched!")
-            print(f"{match.groups()[0]} : {match.groups()[1]}")
-        else:
-            # print("No match.")
-            continue
+# def print1(info, number):
+#     for line in info.stdout:
+#         # print(f"this is the {number} thread")
+#         # print(line.strip())
+#         match = re.search(pattern, line.strip())  # match() checks from the beginning of the string
+#         if match:
+#             # print("Pattern matched!")
+#             print(f"{match.groups()[0]} : {match.groups()[1]}")
+#         else:
+#             # print("No match.")
+#             continue
 
-t3 = ThreadWithReturnValue(target=print1, args=(info,1))
-# t4 = ThreadWithReturnValue(target=print1, args=(info2,2))
-t3.start()
-# t4.start()
-t3.join()
-# t4.join()
+# t3 = ThreadWithReturnValue(target=print1, args=(info,1))
+# # t4 = ThreadWithReturnValue(target=print1, args=(info2,2))
+# t3.start()
+# # t4.start()
+# t3.join()
+# # t4.join()
 
 
 
