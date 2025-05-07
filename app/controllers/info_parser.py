@@ -2,9 +2,12 @@ from fastapi import APIRouter
 from app.services.downloadHandler import get_information
 from app.schemas.schema import VideoRequest, VideoResponse
 
-router = APIRouter()
+router = APIRouter(
+    prefix="/parser",
+    tags=["Video Information"],
+)
 
-@router.post("/extract_video_info")
+@router.post("/video_info")
 async def extract_info(request: VideoRequest) -> VideoResponse:
     url = request.url
     video_response = await get_information(url)

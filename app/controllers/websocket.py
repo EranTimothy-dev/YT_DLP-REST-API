@@ -3,13 +3,16 @@ from typing import List
 import asyncio
 import logging
 
-router = APIRouter()
+router = APIRouter(
+    prefix="/ws",
+    tags=["Websocket"],
+)
 logger = logging.getLogger(__name__)
 video_progress_queue = asyncio.Queue()
 audio_progress_queue = asyncio.Queue()
 active_connections: List[WebSocket] = []
 
-router.websocket("/ws/video_download")
+router.websocket("/video_download")
 async def video_websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
     logger.info("Client connected to video endpoint")
@@ -24,7 +27,7 @@ async def video_websocket_endpoint(websocket: WebSocket):
         logger.warning("Force Cancelled Client Connection")
 
 
-@router.websocket("/ws/audio_download")
+@router.websocket("/audio_download")
 async def audio_websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
     logger.info("Client connected to audio endpoint")
@@ -39,7 +42,7 @@ async def audio_websocket_endpoint(websocket: WebSocket):
         logging.warning("Force Cancelled Client Connection")
 
 
-@router.websocket("/ws/disconnect")
+@router.websocket("/disconnect")
 async def disconnect():
     for websocket in active_connections:
         try:
