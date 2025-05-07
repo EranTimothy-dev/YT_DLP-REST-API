@@ -27,7 +27,7 @@ A robust backend service built with **FastAPI**, **yt-dlp**, and **FFmpeg** for 
 ### Installation
 
 ```bash
-git https://github.com/EranTimothy-dev/YT_VAD-Backend.gitclone
+git clone https://github.com/EranTimothy-dev/YT_VAD-Backend.git
 ```
 ```bash
 cd YT_VAD-Backend
