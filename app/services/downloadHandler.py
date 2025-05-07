@@ -1,9 +1,9 @@
 import re
 import os
 import base64
+import logging
 
 from app.schemas.schema import VideoInfo, VideoResponse
-from app.middleware.logger import logger
 
 import app.services.DownloadOptions as VOps
 import app.services.ExtractionOptions as EOps
@@ -15,8 +15,7 @@ from app.services.ThreadRV import ThreadWithReturnValue as TWRV
 # IMAGE_PATH = f'thumbnail\\{os.listdir("thumbnail\\")[0]}'
 THUMBNAIL_PATH = f'thumbnail\\'
 
-
-
+logger = logging.getLogger(__name__)
 
 
 def convert_image_to_base64():
@@ -28,7 +27,7 @@ def convert_image_to_base64():
             encoded_string = base64.b64encode(image_file.read())
         return encoded_string
     except Exception as e:
-        print(f"Error converting image to base64: {str(e)}")
+        logger.error(f"Error converting image to base64: {str(e)}")
         return None
     finally:
         logger.info(f"Removing thumbnail")   
