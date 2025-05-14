@@ -15,19 +15,20 @@ from app.services.ThreadRV import ThreadWithReturnValue as TWRV
 # IMAGE_PATH = f'thumbnail\\{os.listdir("thumbnail\\")[0]}'
 THUMBNAIL_PATH = f'thumbnail\\'
 
-logger = logging.getLogger(__name__)
+# logger = logging.getLogger("my_logger")
+logger = logging.getLogger("uvicorn")
+# logger = logging.getLogger("temp")
 
 
 def convert_image_to_base64():
     files = os.listdir(THUMBNAIL_PATH)
-    # print(files)
     try:
         with open(f"{THUMBNAIL_PATH}\\{files[0]}", "rb") as image_file:
             logger.info(f"Converting thumbnail to base64")
             encoded_string = base64.b64encode(image_file.read())
         return encoded_string
     except Exception as e:
-        logger.error(f"Error converting image to base64: {str(e)}")
+        logging.debug(f"Error converting image to base64: {str(e)}")
         return None
     finally:
         logger.info(f"Removing thumbnail")   

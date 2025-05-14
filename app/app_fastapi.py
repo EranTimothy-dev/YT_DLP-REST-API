@@ -13,6 +13,10 @@ app = FastAPI(
     )
 
 register_routes(app)
+
+@app.get("/")
+def read_root():
+    return ORJSONResponse("Server is running")
     
 if __name__ == "__main__":
     import uvicorn
