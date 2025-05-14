@@ -1,9 +1,11 @@
 import logging
-from enum import IntEnum
+import logging.handlers
+import sys
+from enum import IntEnum, StrEnum
 
 
-LOG_FORMAT_DEBUG = "%(levelname)s - %(asctime)s - %(module)s - %(funcName)s - %(lineno)d - %(message)s"
-LOG_FORMAT_DEFAULT = "%(levelname)s - %(message)s"
+LOG_FORMAT_DEBUG = "%(levelname)s:    %(asctime)s - %(module)s - %(funcName)s - %(lineno)d - %(message)s"
+LOG_FORMAT_DEFAULT = "%(levelname)s:  %(message)s"
 
 logger = logging.getLogger(__name__)
 
@@ -15,7 +17,15 @@ LOG_COLORS = {
     "RESET": "\033[0m"      # Reset color
 }
 
-class LogLevels(IntEnum):
+class LogLevels(StrEnum):
+    info = "INFO"
+    warn = "WARN"
+    error = "ERROR"
+    debug = "DEBUG"
+
+
+
+class LogLevelsInt(IntEnum):
     debug = logging.DEBUG
     info = logging.INFO
     warning = logging.WARNING
@@ -35,7 +45,7 @@ class LogFormatter(logging.Formatter):
         self.debug_format = debug_format
         
     def format(self, record: logging.LogRecord):
-        if record.levelno == logging.DEBUG:
+        if record.levelname == logging.DEBUG:
             self._fmt = self.debug_format
         else:
             self._fmt = self.default_format
@@ -47,23 +57,52 @@ class LogFormatter(logging.Formatter):
         record.levelname = f"{color}{levelname}{reset}"
         return super().format(record)
 
-def configure_logging(log_level: int = LogLevels.error, log_to_file: bool = False):
+def configure_logging(log_level: str = LogLevels.error):
     log_level = str(log_level).upper()
-    log_level = [level.value for level in LogLevels]
+    log_levels = [level.value for level in LogLevels]
 
-    if log_level not in log_level:
-        logging.basicConfig(level=LogLevels.ERROR)
+    if log_level not in log_levels:
+        logging.basicConfig(level=LogLevels.error, format=LOG_FORMAT_DEFAULT)
         return
-    
+
     if log_level == LogLevels.debug:
         logging.basicConfig(level=log_level, format=LOG_FORMAT_DEBUG)
         return
+
     
-    logging.basicConfig(level=log_level, format=LOG_FORMAT_DEFAULT, force=True)
-    
-    logger = logging.getLogger(__name__)
     formatter = LogFormatter(LOG_FORMAT_DEFAULT, LOG_FORMAT_DEBUG)
-    handler = logging.StreamHandler()
+    handler = logging.StreamHandler(sys.stdout)
     handler.setFormatter(formatter)
+
+    # logger = logging.getLogger("my_logger")
+    logger = logging.getLogger()
+    logger.handlers.clear()
     logger.addHandler(handler)
     logger.setLevel(log_level)
+
+    
+    logger.propagate = False
+
+    logging.basicConfig(level=log_level, format=LOG_FORMAT_DEBUG)
+
+# def configure_logging(log_level: int = LogLevelsInt.error, log_to_file: bool = False):
+#     log_level = [level.value for level in LogLevels]
+
+#     if log_level not in log_level:
+#         logging.basicConfig(level=LogLevels.error)
+#         return
+    
+#     if log_level == LogLevels.debug:
+#         logging.basicConfig(level=log_level, format=LOG_FORMAT_DEBUG)
+#         return
+    
+    
+#     # logger = logging.getLogger(__name__)
+#     # formatter = LogFormatter(LOG_FORMAT_DEFAULT, LOG_FORMAT_DEBUG)
+#     # handler = logging.StreamHandler(sys.stdout)
+#     # # handler = logging.FileHandler("app.log")
+#     # handler.setFormatter(formatter)
+#     # logger.addHandler(handler)
+#     # logger.setLevel(log_level)
+
+#     logging.basicConfig(level=log_level, format=LOG_FORMAT_DEFAULT)
