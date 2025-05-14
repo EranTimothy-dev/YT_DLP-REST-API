@@ -62,8 +62,13 @@ async def get_information(url,thumbnail_path = "thumbnail\\"):
             
 
 
-
-
+def extract_download_info(line: str):
+    pattern = re.compile(r"\[download\]\s+(?P<percentage>[\d.]+)%\s+of\s+(?P<size>[\d.]+\w+)\s+at\s+(?P<speed>[\d.]+\w+/s)\s+ETA\s+(?P<eta>\d{2}:\d{2})")
+    match = pattern.search(line)
+    if match:
+        return match.groupdict()
+    else:
+        return None
 
 
 
