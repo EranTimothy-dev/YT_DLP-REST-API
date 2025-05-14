@@ -5,14 +5,14 @@ import logging
 
 router = APIRouter(
     prefix="/ws",
-    tags=["Websocket"],
+    # tags=["Websocket"],
 )
 # logger = logging.getLogger(__name__)
 video_progress_queue = asyncio.Queue()
 audio_progress_queue = asyncio.Queue()
 active_connections: List[WebSocket] = []
 
-router.websocket("/video_download")
+@router.websocket("/video_download")
 async def video_websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
     logging.info("Client connected to video endpoint")
