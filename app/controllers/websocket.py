@@ -1,11 +1,12 @@
 from fastapi import WebSocket, WebSocketDisconnect, APIRouter
+from fastapi.responses import ORJSONResponse
 from typing import List
 import asyncio
 import logging
 
 router = APIRouter(
     prefix="/ws",
-    # tags=["Websocket"],
+    tags=["Websocket"],
 )
 # logger = logging.getLogger(__name__)
 video_progress_queue = asyncio.Queue()
@@ -25,7 +26,8 @@ async def video_websocket_endpoint(websocket: WebSocket):
         logging.error("Client got disconnected from video endpoint")
     except asyncio.exceptions.CancelledError:
         logging.warning("Force Cancelled Client Connection")
-
+    except KeyboardInterrupt:
+        logging.warning("Force Cancelled Server Connection")
 
 @router.websocket("/audio_download")
 async def audio_websocket_endpoint(websocket: WebSocket):
@@ -40,9 +42,11 @@ async def audio_websocket_endpoint(websocket: WebSocket):
         logging.error("Client got disconnected from audio endpoint")
     except asyncio.exceptions.CancelledError:
         logging.warning("Force Cancelled Client Connection")
+    except KeyboardInterrupt:
+        logging.warning("Force Cancelled Server Connection")
 
 
-@router.websocket("/disconnect")
+@router.post("/disconnect")
 async def disconnect():
     for websocket in active_connections:
         try:
@@ -51,4 +55,12 @@ async def disconnect():
             logging.info("Client disconnected from all endpoints")
         except Exception as e:
             logging.error(f"Error disconnecting client: {str(e)}")
+        except WebSocketDisconnect:
+            logging.error("Client got disconnected from audio endpoint")
+        except asyncio.exceptions.CancelledError:
+            logging.warning("Force Cancelled Client Connection")
+        except KeyboardInterrupt:
+            logging.warning("Force Cancelled Server Connection")
+    return ORJSONResponse(status_code=200, content={"message": "Client disconnected from all endpoints"})
+
 

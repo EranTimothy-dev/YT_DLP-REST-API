@@ -5,10 +5,12 @@ from subprocess import Popen
 from signal import SIGTERM  
 import asyncio
 import psutil
+import logging
 
 from app.schemas.schema import DownloadRequest
 from app.services.DownloadOptions import download_video, download_audio
 from app.controllers.websocket import video_progress_queue, audio_progress_queue
+from app.services.downloadHandler import extract_download_info
 
 
 router = APIRouter(
@@ -29,8 +31,12 @@ async def download_yt_video(request: Optional[DownloadRequest], response: Respon
         global download
         download = download_video(request.url, request.quality, request.extension)
         for line in download.stdout:
-            loop.call_soon_threadsafe(video_progress_queue.put_nowait, line)
-            print(f"\r{line.strip():<150}", end="",flush=True) # make sure the progress is printied on the same line
+            match = extract_download_info(line)
+            if match:
+                logging.info(match)
+            else:
+                continue
+            loop.call_soon_threadsafe(video_progress_queue.put_nowait, match)
         download.returncode = None
 
     # run sync function asynchronously as a thread
@@ -51,8 +57,12 @@ async def download_yt_audio(request: Optional[DownloadRequest], response: Respon
         global download
         download = download_audio(request.url)
         for line in download.stdout:
-            loop.call_soon_threadsafe(audio_progress_queue.put_nowait, line)
-            print(f"\r{line.strip():<150}", end="",flush=True) # make sure the progress is printied on the same line
+            match = extract_download_info(line)
+            if match:
+                logging.info(match)
+            else:
+                continue
+            loop.call_soon_threadsafe(audio_progress_queue.put_nowait, match)
         download.returncode = None
 
     await asyncio.to_thread(downloader)
