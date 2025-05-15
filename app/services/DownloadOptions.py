@@ -15,8 +15,8 @@ def download_video(url,quality,extension):
     return process
     # subprocess.run(cmd, text = True, check=True)
 
-def download_age_restricted_video(url, quality, extension):
-    cmd = ['yt-dlp',"--cookies-from-browser", "firefox", url,"-f", f"bv*[height={quality}]+ba","--merge-output-format", f"{extension}", "-P", "downloads\\", "-P", "temp:temp\\","--windows-filenames","-N", "4"]
+def download_age_restricted_video(url, quality, extension, browser):
+    cmd = ['yt-dlp',"--cookies-from-browser", f"{browser}", url,"-f", f"bv*[height={quality}]+ba","--merge-output-format", f"{extension}", "-P", "downloads\\", "-P", "temp:temp\\","--windows-filenames","-N", "4"]
     process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, universal_newlines=True, bufsize=1, encoding="utf-8", creationflags=CREATE_NEW_PROCESS_GROUP)
     return process
     
